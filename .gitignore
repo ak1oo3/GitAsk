@@ -1,0 +1,34 @@
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+build/
+dist/
+
+# venv
+.venv/
+venv/
+env/
+
+# env / secrets
+.env
+.env.local
+
+# cloned repos cache
+.repos/
+
+# vector data / local db
+pgdata/
+
+# OS / editor
+.DS_Store
+.idea/
+.vscode/
+
+# test / coverage
+.pytest_cache/
+.coverage
+htmlcov/
+
+# node (frontend, if used)
+node_modules/
