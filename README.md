@@ -5,10 +5,16 @@ questions about the codebase — *"where is auth handled?"*, *"how are sessions
 signed?"* — and get **grounded, cited answers** with `file.py:42`-style
 citations instead of hallucinated generalities.
 
-> Built a RAG-based codebase Q&A tool using AST-aware code chunking
+> **Built a RAG-based codebase Q&A tool** using AST-aware code chunking
 > (tree-sitter), pgvector for hybrid vector + keyword retrieval, and grounded
 > LLM prompting with source citations; evaluated retrieval precision against a
-> hand-labeled question set.
+> hand-labeled 20-question set — **BM25 baseline: 55% Top-3 / 80% Top-5**
+> (P@5 = 0.30, MRR = 0.44); the hybrid figure fills in from a full run, see
+> [Evaluation](#evaluation--retrieval-precision).
+
+**Topics:** `rag` · `llm` · `claude` · `anthropic` · `pgvector` · `vector-search` ·
+`hybrid-search` · `bm25` · `tree-sitter` · `code-search` · `fastapi` ·
+`semantic-search` · `embeddings` · `question-answering`
 
 ---
 
