@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>GitAsk — Codebase Q&A</title>
+<style>
+  :root {
+    --bg: #0d1117;
+    --panel: #161b22;
+    --panel-2: #1c2230;
+    --border: #30363d;
+    --text: #e6edf3;
+    --muted: #8b949e;
+    --accent: #4c8dff;
+    --accent-2: #2ea043;
+    --code: #c9d1d9;
+    --danger: #f85149;
+    --radius: 10px;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.5;
+  }
+  header {
+    padding: 20px 24px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+  }
+  header h1 { margin: 0; font-size: 20px; letter-spacing: 0.3px; }
+  header .tag { color: var(--muted); font-size: 13px; }
+  main {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 24px 16px 80px;
+  }
+  .card {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px;
+    margin-bottom: 18px;
+  }
+  .card h2 { margin: 0 0 12px; font-size: 14px; text-transform: uppercase; letter-spacing: 0.6px; color: var(--muted); }
+  .row { display: flex; gap: 8px; flex-wrap: wrap; }
+  input, select, textarea {
+    background: var(--panel-2);
+    color: var(--text);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 12px;
+    font-size: 14px;
+    font-family: inherit;
+  }
+  input, select { flex: 1; min-width: 180px; }
+  textarea { width: 100%; resize: vertical; min-height: 70px; }
+  button {
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    padding: 10px 18px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: filter 0.15s ease;
+  }
+  button:hover { filter: brightness(1.08); }
+  button:disabled { opacity: 0.55; cursor: not-allowed; }
+  button.secondary { background: var(--panel-2); border: 1px solid var(--border); color: var(--text); }
+  .status { font-size: 13px; margin-top: 10px; min-height: 18px; }
+  .status.ok { color: var(--accent-2); }
+  .status.err { color: var(--danger); }
+  .status.busy { color: var(--accent); }
+  .answer {
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    background: var(--panel-2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 14px;
+    font-size: 15px;
+  }
+  .citations { margin-top: 12px; display: flex; flex-wrap: wrap; gap: 8px; }
+  .cite {
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 12px;
+    background: rgba(76,141,255,0.12);
+    border: 1px solid rgba(76,141,255,0.4);
+    color: var(--accent);
+    padding: 4px 8px;
+    border-radius: 6px;
+  }
+  details { margin-top: 14px; }
+  summary { cursor: pointer; color: var(--muted); font-size: 13px; user-select: none; }
+  .chunk {
+    margin-top: 10px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+  }
+  .chunk-head {
+    display: flex; justify-content: space-between; align-items: center;
+    background: var(--panel-2); padding: 6px 10px; font-size: 12px;
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace; color: var(--muted);
+  }
+  .chunk-head .score { color: var(--accent); }
+  pre.code {
+    margin: 0; padding: 10px 12px; overflow-x: auto;
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 12px; color: var(--code); background: #0b0f16;
+  }
+  .empty { color: var(--muted); font-size: 14px; }
+  .settings { font-size: 12px; color: var(--muted); }
+  .settings input { min-width: 260px; padding: 6px 8px; font-size: 12px; }
+  a { color: var(--accent); }
+</style>
+</head>
+<body>
+<header>
+  <h1>GitAsk</h1>
+  <span class="tag">RAG-powered codebase Q&amp;A — grounded, cited answers</span>
+</header>
+
+<main>
+  <!-- Index a repo -->
+  <section class="card">
+    <h2>1 · Index a repository</h2>
+    <div class="row">
+      <input id="repoUrl" type="text" placeholder="https://github.com/pallets/flask" />
+      <button id="indexBtn">Index</button>
+    </div>
+    <div id="indexStatus" class="status"></div>
+  </section>
+
+  <!-- Pick a repo + ask -->
+  <section class="card">
+    <h2>2 · Ask a question</h2>
+    <div class="row" style="margin-bottom:10px;">
+      <select id="repoSelect"><option value="">— no repo indexed yet —</option></select>
+      <button id="refreshBtn" class="secondary">Refresh</button>
+    </div>
+    <textarea id="question" placeholder="Where is HTTP routing handled? How are sessions signed?"></textarea>
+    <div class="row" style="margin-top:10px;">
+      <button id="askBtn">Ask</button>
+    </div>
+    <div id="askStatus" class="status"></div>
+  </section>
+
+  <!-- Answer -->
+  <section class="card" id="answerCard" style="display:none;">
+    <h2>Answer</h2>
+    <div id="answer" class="answer"></div>
+    <div id="citations" class="citations"></div>
+    <details id="retrievedWrap">
+      <summary>Retrieved chunks</summary>
+      <div id="retrieved"></div>
+    </details>
+  </section>
+
+  <section class="settings">
+    Backend: <input id="backend" type="text" />
+    <span> (leave as-is when the API serves this page)</span>
+  </section>
+</main>
+
+<script>
+// Backend base URL: same-origin by default (the FastAPI app serves this file).
+const backendInput = document.getElementById("backend");
+backendInput.value = localStorage.getItem("gitask_backend") || "";
+function base() {
+  const v = backendInput.value.trim().replace(/\/+$/, "");
+  return v;
+}
+backendInput.addEventListener("change", () => {
+  localStorage.setItem("gitask_backend", backendInput.value.trim());
+  loadRepos();
+});
+
+function api(path) { return base() + path; }
+
+function setStatus(el, msg, kind) {
+  el.textContent = msg;
+  el.className = "status" + (kind ? " " + kind : "");
+}
+
+async function loadRepos() {
+  const sel = document.getElementById("repoSelect");
+  try {
+    const res = await fetch(api("/repos"));
+    const data = await res.json();
+    const repos = data.repos || [];
+    const prev = sel.value;
+    sel.innerHTML = "";
+    if (repos.length === 0) {
+      sel.innerHTML = '<option value="">— no repo indexed yet —</option>';
+    } else {
+      for (const r of repos) {
+        const opt = document.createElement("option");
+        opt.value = r; opt.textContent = r;
+        sel.appendChild(opt);
+      }
+      if (repos.includes(prev)) sel.value = prev;
+    }
+  } catch (e) {
+    // backend not reachable yet — leave placeholder
+  }
+}
+
+document.getElementById("refreshBtn").addEventListener("click", loadRepos);
+
+document.getElementById("indexBtn").addEventListener("click", async () => {
+  const url = document.getElementById("repoUrl").value.trim();
+  const st = document.getElementById("indexStatus");
+  const btn = document.getElementById("indexBtn");
+  if (!url) { setStatus(st, "Enter a GitHub URL first.", "err"); return; }
+  setStatus(st, "Indexing " + url + " … (cloning, chunking, embedding — this can take a bit)", "busy");
+  btn.disabled = true;
+  try {
+    const res = await fetch(api("/index"), {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ url })
+    });
+    if (!res.ok) throw new Error((await res.json()).detail || res.statusText);
+    const r = await res.json();
+    const langs = Object.entries(r.languages).map(([k, v]) => `${k}:${v}`).join(", ");
+    setStatus(st, `Indexed ${r.repo} — ${r.files_indexed} files, ${r.chunks_indexed} chunks (${langs}).`, "ok");
+    await loadRepos();
+    document.getElementById("repoSelect").value = r.repo;
+  } catch (e) {
+    setStatus(st, "Index failed: " + e.message, "err");
+  } finally {
+    btn.disabled = false;
+  }
+});
+
+document.getElementById("askBtn").addEventListener("click", async () => {
+  const repo = document.getElementById("repoSelect").value;
+  const question = document.getElementById("question").value.trim();
+  const st = document.getElementById("askStatus");
+  const btn = document.getElementById("askBtn");
+  if (!repo) { setStatus(st, "Index and pick a repo first.", "err"); return; }
+  if (!question) { setStatus(st, "Type a question.", "err"); return; }
+  setStatus(st, "Retrieving + generating grounded answer…", "busy");
+  btn.disabled = true;
+  try {
+    const res = await fetch(api("/ask"), {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ repo, question })
+    });
+    if (!res.ok) throw new Error((await res.json()).detail || res.statusText);
+    const data = await res.json();
+    renderAnswer(data);
+    setStatus(st, "", "");
+  } catch (e) {
+    setStatus(st, "Ask failed: " + e.message, "err");
+  } finally {
+    btn.disabled = false;
+  }
+});
+
+function label(c) {
+  return c.start_line === c.end_line
+    ? `${c.file_path}:${c.start_line}`
+    : `${c.file_path}:${c.start_line}-${c.end_line}`;
+}
+
+function renderAnswer(data) {
+  document.getElementById("answerCard").style.display = "block";
+  document.getElementById("answer").textContent = data.text || "(no answer)";
+
+  const cwrap = document.getElementById("citations");
+  cwrap.innerHTML = "";
+  (data.citations || []).forEach(c => {
+    const span = document.createElement("span");
+    span.className = "cite";
+    span.textContent = label(c) + (c.symbol_name ? `  ·  ${c.symbol_name}` : "");
+    cwrap.appendChild(span);
+  });
+
+  const rwrap = document.getElementById("retrieved");
+  rwrap.innerHTML = "";
+  const retrieved = data.retrieved || [];
+  if (retrieved.length === 0) {
+    rwrap.innerHTML = '<div class="empty">No chunks retrieved.</div>';
+    return;
+  }
+  retrieved.forEach(rc => {
+    const c = rc.chunk;
+    const div = document.createElement("div");
+    div.className = "chunk";
+    const head = document.createElement("div");
+    head.className = "chunk-head";
+    head.innerHTML = `<span>${label(c)}${c.symbol_name ? " · " + c.symbol_name : ""}</span>`
+      + `<span class="score">score ${(rc.score ?? 0).toFixed(3)} · v ${(rc.vector_score ?? 0).toFixed(2)} · kw ${(rc.keyword_score ?? 0).toFixed(2)}</span>`;
+    const pre = document.createElement("pre");
+    pre.className = "code";
+    pre.textContent = c.content || "";
+    div.appendChild(head);
+    div.appendChild(pre);
+    rwrap.appendChild(div);
+  });
+}
+
+loadRepos();
+</script>
+</body>
+</html>

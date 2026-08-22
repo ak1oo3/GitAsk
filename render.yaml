@@ -1,0 +1,32 @@
+# Render deployment: FastAPI backend + managed pgvector Postgres.
+# Docs: https://render.com/docs/blueprint-spec
+services:
+  - type: web
+    name: gitask-api
+    runtime: python
+    plan: starter
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn gitask.api.main:app --host 0.0.0.0 --port $PORT --app-dir src
+    healthCheckPath: /health
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: gitask-db
+          property: connectionString
+      - key: EMBEDDING_PROVIDER
+        value: local
+      - key: LOCAL_EMBEDDING_MODEL
+        value: BAAI/bge-small-en-v1.5
+      - key: ANTHROPIC_API_KEY
+        sync: false          # set in the Render dashboard (secret)
+      - key: ANTHROPIC_MODEL
+        value: claude-sonnet-5
+      - key: PYTHONUNBUFFERED
+        value: "1"
+
+databases:
+  - name: gitask-db
+    plan: starter
+    # Render Postgres supports the pgvector extension; the app runs
+    # `CREATE EXTENSION IF NOT EXISTS vector` in VectorStore.init_schema().
+    postgresMajorVersion: "16"

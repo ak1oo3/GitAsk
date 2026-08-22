@@ -1,0 +1,11 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "version": 2,
+  "public": true,
+  "outputDirectory": "frontend",
+  "cleanUrls": true,
+  "rewrites": [
+    { "source": "/", "destination": "/index.html" }
+  ],
+  "comment": "Deploys the static frontend in frontend/. The chat page talks to the backend at same-origin by default; when hosting the frontend on Vercel and the API elsewhere (Railway/Render), open the page and paste the backend URL into the 'Backend' field (it is remembered in localStorage), or hardcode it in frontend/index.html. Enable CORS is already on in the FastAPI app."
+}
