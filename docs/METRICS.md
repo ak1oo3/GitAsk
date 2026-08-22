@@ -70,3 +70,10 @@ python eval/evaluate.py --repo-url https://github.com/pallets/flask --per-questi
 Numbers labeled **measured** come from a real run of the committed harness.
 Everything marked `<FILL FROM eval run>` is a placeholder for a live run and has
 **not** been fabricated or estimated.
+
+A live full-ablation run was attempted in the build/CI environment (pgvector was
+brought up and the retrieval stack installed), but the `vector` and `hybrid`
+rows could not be produced there: the network egress policy blocks the embedding
+model download (`huggingface.co`) and the OpenAI API, and no weights were cached.
+On any machine where those hosts are reachable the numbers fill in with the
+single `--repo-url` command above.
